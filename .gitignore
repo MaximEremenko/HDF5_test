@@ -1,0 +1,22 @@
+# Build and install outputs
+build/
+build_x64_VS2022/
+build_demo_x64_VS2022/
+bin_x64_VS2022/
+install/
+
+# CMake-generated files (in case of in-source configure)
+CMakeCache.txt
+CMakeFiles/
+cmake_install.cmake
+CTestTestfile.cmake
+Makefile
+
+# Visual Studio artifacts
+.vs/
+*.sln
+*.vcxproj*
+*.vfproj*
+
+# Demo output data
+*.h5
