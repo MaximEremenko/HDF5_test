@@ -4,11 +4,7 @@ This project demonstrates how to build and package HDF5 with Fortran bindings on
 
 ## Goal
 
-Answer to:
-
-`Do you know how to install the HDF5 library including Fortran bindings on Windows?`
-
-Yes. This repo provides a one-click batch script that:
+This project provides a single batch script to build, install, and test HDF5 with Fortran bindings on Windows. It:
 
 1. Loads Intel oneAPI environment (`ifx`).
 2. Configures HDF5 with `-G "Visual Studio 17 2022" -T "fortran=ifx"`.
@@ -31,7 +27,7 @@ Expected source layout:
 
 ## Clone with submodules
 
-Clone this repo and fetch `hdf5` submodule in one step:
+Clone this repository and fetch the `hdf5` submodule in one step:
 
 ```bat
 git clone --recurse-submodules https://github.com/MaximEremenko/HDF5_test.git
@@ -66,7 +62,7 @@ If successful, the demo creates:
 3. `project\bin\*.dll` (runtime DLLs for direct launch)
 4. `project\lib\*.lib` and `project\lib\*.a` (import/static libraries)
 
-Run deployed exe:
+Run the deployed executable:
 
 ```bat
 project\bin\hdf5_fortran_smoke.exe
@@ -74,7 +70,7 @@ project\bin\hdf5_fortran_smoke.exe
 
 ## Manual command sequence
 
-The batch script uses this flow:
+The script includes this HDF5 configure/build/install sequence:
 
 ```bat
 call "C:\Program Files (x86)\Intel\oneAPI\setvars.bat" intel64
@@ -106,6 +102,8 @@ cmake --build . --config Release --target clean_cpack
 cmake --build . --config Release --target install
 cd ..
 ```
+
+For the full end-to-end flow (including smoke test build and deployment), run `hdf5_fortran_vs_demo.bat`.
 
 ## Troubleshooting
 
