@@ -1,65 +1,56 @@
-# HDF5 Fortran on Windows (VS2022 + ifx) Demo
+# HDF5 Fortran on Windows (VS2022 + ifx)
 
-This project demonstrates how to build and package HDF5 with Fortran bindings on Windows using Visual Studio 2022 tools and Intel `ifx`.
+## Overview
 
-## Goal
+This repository automates building HDF5 with Fortran bindings on Windows and verifies the installation with a Fortran smoke test.
 
-This project provides a single batch script to build, install, and test HDF5 with Fortran bindings on Windows. It:
+The script `hdf5_fortran_vs_demo.bat` performs:
 
-1. Loads Intel oneAPI environment (`ifx`).
-2. Configures HDF5 with `-G "Visual Studio 17 2022" -T "fortran=ifx"`.
-3. Builds package/install targets.
-4. Builds and runs a Fortran smoke test linked against installed HDF5.
+1. Intel oneAPI environment initialization (`ifx`).
+2. HDF5 configure/build/install with `Visual Studio 2022` and `fortran=ifx`.
+3. Fortran smoke test configure/build/run.
+4. Deployment of runtime files and libraries to a standard Windows layout.
 
-## Prerequisites
+## Requirements
 
-Install these first:
-
-1. Visual Studio 2022 with C++ build tools.
+1. Visual Studio 2022 with C/C++ build tools.
 2. Intel oneAPI HPC Toolkit (Fortran `ifx`).
-3. CMake (available in `PATH`).
+3. CMake available in `PATH`.
 
-Expected source layout:
+## Repository Layout
 
-1. `hdf5/` (HDF5 source tree)
-2. `fortran_demo/` (smoke test CMake project)
-3. `hdf5_fortran_vs_demo.bat`
+1. `hdf5/`: HDF5 source submodule.
+2. `fortran_demo/`: Fortran smoke-test project.
+3. `hdf5_fortran_vs_demo.bat`: automation script.
 
-## Clone with submodules
-
-Clone this repository and fetch the `hdf5` submodule in one step:
+## Clone
 
 ```bat
 git clone --recurse-submodules https://github.com/MaximEremenko/HDF5_test.git
 cd HDF5_test
 ```
 
-If you already cloned without submodules:
+If cloned without submodules:
 
 ```bat
 git submodule update --init --recursive
 ```
 
-## One-click run
+## Build and Validate
 
-From the repository root:
+Run from the repository root:
 
 ```bat
 hdf5_fortran_vs_demo.bat
 ```
 
-Main output folders:
+## Output Artifacts
 
-1. `build_x64_VS2022`
-2. `bin_x64_VS2022`
-3. `build_demo_x64_VS2022`
-4. `project`
-
-If successful, the demo creates:
+After a successful run:
 
 1. `build_demo_x64_VS2022\fortran_demo.h5`
-2. `project\bin\hdf5_fortran_smoke.exe` (Fortran app)
-3. `project\bin\*.dll` (runtime DLLs for direct launch)
+2. `project\bin\hdf5_fortran_smoke.exe`
+3. `project\bin\*.dll` (runtime DLLs)
 4. `project\lib\*.lib` and `project\lib\*.a` (import/static libraries)
 
 Run the deployed executable:
@@ -68,9 +59,7 @@ Run the deployed executable:
 project\bin\hdf5_fortran_smoke.exe
 ```
 
-## Manual command sequence
-
-The script includes this HDF5 configure/build/install sequence:
+## Manual HDF5 Configure/Build/Install
 
 ```bat
 call "C:\Program Files (x86)\Intel\oneAPI\setvars.bat" intel64
@@ -103,13 +92,11 @@ cmake --build . --config Release --target install
 cd ..
 ```
 
-For the full end-to-end flow (including smoke test build and deployment), run `hdf5_fortran_vs_demo.bat`.
-
 ## Troubleshooting
 
 1. `ifx` not found:
-   Run `call "C:\Program Files (x86)\Intel\oneAPI\setvars.bat" intel64` and verify `where ifx`.
-2. CMake generator/toolset error:
-   Ensure Visual Studio 2022 is installed and supports C++ tools.
-3. MSBuild `MSB3061` access denied in `VCTargetsPath`:
-   Close processes that may lock build files (indexers, antivirus, IDE background scans), delete build folder, rerun.
+   Run `call "C:\Program Files (x86)\Intel\oneAPI\setvars.bat" intel64`, then `where ifx`.
+2. Generator/toolset errors:
+   Confirm Visual Studio 2022 and C/C++ build tools are installed.
+3. `MSB3061` or file access/lock errors:
+   Close tools that may lock build files, delete build folders, and rerun.
