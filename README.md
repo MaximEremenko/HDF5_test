@@ -29,6 +29,21 @@ Expected source layout:
 2. `fortran_demo/` (smoke test CMake project)
 3. `one_click_hdf5_fortran_vs_demo.bat`
 
+## Clone with submodules
+
+Clone this repo and fetch `hdf5` submodule in one step:
+
+```bat
+git clone --recurse-submodules <your-repo-url>
+cd HDF5_test
+```
+
+If you already cloned without submodules:
+
+```bat
+git submodule update --init --recursive
+```
+
 ## One-click run
 
 From `c:\Projects\HDF5_test`:
@@ -42,10 +57,20 @@ Main output folders:
 1. `build_x64_VS2022`
 2. `bin_x64_VS2022`
 3. `build_demo_x64_VS2022`
+4. `project`
 
 If successful, the demo creates:
 
 1. `build_demo_x64_VS2022\fortran_demo.h5`
+2. `project\bin\hdf5_fortran_smoke.exe`
+3. `project\lib\` (required DLLs)
+4. `project\run_demo.bat` (runs exe with `project\lib` on `PATH`)
+
+Run deployed exe:
+
+```bat
+project\run_demo.bat
+```
 
 ## Manual command sequence
 
