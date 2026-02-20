@@ -34,7 +34,7 @@ Expected source layout:
 Clone this repo and fetch `hdf5` submodule in one step:
 
 ```bat
-git clone --recurse-submodules <your-repo-url>
+git clone --recurse-submodules https://github.com/MaximEremenko/HDF5_test.git
 cd HDF5_test
 ```
 
@@ -62,14 +62,14 @@ Main output folders:
 If successful, the demo creates:
 
 1. `build_demo_x64_VS2022\fortran_demo.h5`
-2. `project\bin\hdf5_fortran_smoke.exe`
-3. `project\lib\` (required DLLs)
-4. `project\run_demo.bat` (runs exe with `project\lib` on `PATH`)
+2. `project\bin\hdf5_fortran_smoke.exe` (Fortran app)
+3. `project\bin\*.dll` (runtime DLLs for direct launch)
+4. `project\lib\*.lib` (import/static libraries)
 
 Run deployed exe:
 
 ```bat
-project\run_demo.bat
+project\bin\hdf5_fortran_smoke.exe
 ```
 
 ## Manual command sequence

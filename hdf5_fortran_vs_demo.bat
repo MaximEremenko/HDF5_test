@@ -43,6 +43,7 @@ if exist "%PROJECT_DIR%" rmdir /S /Q "%PROJECT_DIR%"
 mkdir "%INSTALL_DIR%"
 mkdir "%BUILD_DIR%"
 mkdir "%DEMO_BUILD%"
+mkdir "%PROJECT_DIR%"
 mkdir "%PROJECT_BIN%"
 mkdir "%PROJECT_LIB%"
 
@@ -97,10 +98,22 @@ if errorlevel 1 (
 )
 
 echo [7/8] Running smoke test...
-set "PATH=%INSTALL_DIR%\bin;%PATH%"
-set "SMOKE_EXE=%DEMO_BUILD%\Release\hdf5_fortran_smoke.exe"
-if not exist "%SMOKE_EXE%" set "SMOKE_EXE=%DEMO_BUILD%\hdf5_fortran_smoke.exe"
-if not exist "%SMOKE_EXE%" (
+if exist "%DEMO_BUILD%\project\bin" (
+  set "PATH=%DEMO_BUILD%\project\bin;%INSTALL_DIR%\bin;%PATH%"
+) else (
+  set "PATH=%INSTALL_DIR%\bin;%PATH%"
+)
+set "SMOKE_EXE="
+for %%F in (
+  "%DEMO_BUILD%\project\bin\hdf5_fortran_smoke.exe"
+  "%DEMO_BUILD%\project\bin\Release\hdf5_fortran_smoke.exe"
+  "%DEMO_BUILD%\project\Release\hdf5_fortran_smoke.exe"
+  "%DEMO_BUILD%\Release\hdf5_fortran_smoke.exe"
+  "%DEMO_BUILD%\hdf5_fortran_smoke.exe"
+) do (
+  if not defined SMOKE_EXE if exist "%%~fF" set "SMOKE_EXE=%%~fF"
+)
+if not defined SMOKE_EXE (
   echo ERROR: smoke-test executable not found.
   exit /b 1
 )
@@ -114,37 +127,47 @@ if not "%SMOKE_RC%"=="0" (
 )
 
 echo [8/8] Creating deploy folder with exe and DLLs...
-copy /Y "%SMOKE_EXE%" "%PROJECT_BIN%\hdf5_fortran_smoke.exe" >nul
-if errorlevel 1 (
-  echo ERROR: failed to copy executable.
+if not defined SMOKE_EXE (
+  echo ERROR: smoke-test executable not found.
   exit /b 1
 )
 
-if exist "%INSTALL_DIR%\bin\*.dll" copy /Y "%INSTALL_DIR%\bin\*.dll" "%PROJECT_LIB%\" >nul
-if exist "%INSTALL_DIR%\lib\*.dll" copy /Y "%INSTALL_DIR%\lib\*.dll" "%PROJECT_LIB%\" >nul
+copy /Y "%SMOKE_EXE%" "%PROJECT_BIN%\hdf5_fortran_smoke.exe" >nul
+if errorlevel 1 (
+  echo ERROR: failed to copy smoke-test executable.
+  exit /b 1
+)
+
+if exist "%DEMO_BUILD%\project\bin\*.dll" copy /Y "%DEMO_BUILD%\project\bin\*.dll" "%PROJECT_BIN%\" >nul
+if exist "%DEMO_BUILD%\project\bin\Release\*.dll" copy /Y "%DEMO_BUILD%\project\bin\Release\*.dll" "%PROJECT_BIN%\" >nul
+if exist "%DEMO_BUILD%\project\Release\*.dll" copy /Y "%DEMO_BUILD%\project\Release\*.dll" "%PROJECT_BIN%\" >nul
+if exist "%DEMO_BUILD%\Release\*.dll" copy /Y "%DEMO_BUILD%\Release\*.dll" "%PROJECT_BIN%\" >nul
+if exist "%DEMO_BUILD%\*.dll" copy /Y "%DEMO_BUILD%\*.dll" "%PROJECT_BIN%\" >nul
+
+if exist "%INSTALL_DIR%\bin\*.dll" (
+  copy /Y "%INSTALL_DIR%\bin\*.dll" "%PROJECT_BIN%\" >nul
+)
+if exist "%INSTALL_DIR%\lib\*.dll" (
+  copy /Y "%INSTALL_DIR%\lib\*.dll" "%PROJECT_BIN%\" >nul
+)
+if exist "%INSTALL_DIR%\lib\*.lib" (
+  copy /Y "%INSTALL_DIR%\lib\*.lib" "%PROJECT_LIB%\" >nul
+)
+if exist "%INSTALL_DIR%\lib\*.a" (
+  copy /Y "%INSTALL_DIR%\lib\*.a" "%PROJECT_LIB%\" >nul
+)
 
 for %%D in (libifcoremd.dll libifportmd.dll libmmd.dll svml_dispmd.dll libiomp5md.dll) do (
   for /f "delims=" %%P in ('where %%D 2^>nul') do (
-    if not exist "%PROJECT_LIB%\%%~nxP" copy /Y "%%P" "%PROJECT_LIB%\" >nul
+    if not exist "%PROJECT_BIN%\%%~nxP" copy /Y "%%P" "%PROJECT_BIN%\" >nul
   )
 )
-
-(
-  echo @echo off
-  echo setlocal EnableExtensions
-  echo set "ROOT=%%~dp0"
-  echo if "%%ROOT:~-1%%"=="\" set "ROOT=%%ROOT:~0,-1%%"
-  echo set "PATH=%%ROOT%%\lib;%%PATH%%"
-  echo "%%ROOT%%\bin\hdf5_fortran_smoke.exe"
-  echo set "RC=%%ERRORLEVEL%%"
-  echo endlocal ^& exit /b %%RC%%
-) > "%PROJECT_DIR%\run_demo.bat"
 
 echo.
 echo SUCCESS
 echo HDF5 install: %INSTALL_DIR%
 echo Demo output: %DEMO_BUILD%\fortran_demo.h5
 echo Deploy exe: %PROJECT_BIN%\hdf5_fortran_smoke.exe
-echo Deploy libs: %PROJECT_LIB%
-echo Launcher: %PROJECT_DIR%\run_demo.bat
+echo Deploy runtime DLLs: %PROJECT_BIN%
+echo Deploy import/static libs: %PROJECT_LIB%
 exit /b 0
