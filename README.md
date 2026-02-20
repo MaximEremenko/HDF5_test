@@ -27,7 +27,7 @@ Expected source layout:
 
 1. `hdf5/` (HDF5 source tree)
 2. `fortran_demo/` (smoke test CMake project)
-3. `one_click_hdf5_fortran_vs_demo.bat`
+3. `hdf5_fortran_vs_demo.bat`
 
 ## Clone with submodules
 
@@ -49,7 +49,7 @@ git submodule update --init --recursive
 From `c:\Projects\HDF5_test`:
 
 ```bat
-one_click_hdf5_fortran_vs_demo.bat
+hdf5_fortran_vs_demo.bat
 ```
 
 Main output folders:

@@ -9,8 +9,11 @@ set "DEMO_SRC=%ROOT_DIR%\fortran_demo"
 set "BUILD_DIR=%ROOT_DIR%\build_x64_VS2022"
 set "INSTALL_DIR=%ROOT_DIR%\bin_x64_VS2022"
 set "DEMO_BUILD=%ROOT_DIR%\build_demo_x64_VS2022"
+set "PROJECT_DIR=%ROOT_DIR%\project"
+set "PROJECT_BIN=%PROJECT_DIR%\bin"
+set "PROJECT_LIB=%PROJECT_DIR%\lib"
 
-echo [1/7] Loading Intel oneAPI environment...
+echo [1/8] Loading Intel oneAPI environment...
 call "C:\Program Files (x86)\Intel\oneAPI\setvars.bat" intel64
 if errorlevel 1 (
   echo ERROR: failed to initialize Intel oneAPI environment.
@@ -22,7 +25,7 @@ if errorlevel 1 (
   exit /b 1
 )
 
-echo [2/7] Checking sources...
+echo [2/8] Checking sources...
 if not exist "%SRC_DIR%\CMakeLists.txt" (
   echo ERROR: HDF5 source tree not found at "%SRC_DIR%".
   exit /b 1
@@ -32,15 +35,18 @@ if not exist "%DEMO_SRC%\CMakeLists.txt" (
   exit /b 1
 )
 
-echo [3/7] Cleaning build and install folders...
+echo [3/8] Cleaning build and install folders...
 if exist "%BUILD_DIR%" rmdir /S /Q "%BUILD_DIR%"
 if exist "%INSTALL_DIR%" rmdir /S /Q "%INSTALL_DIR%"
 if exist "%DEMO_BUILD%" rmdir /S /Q "%DEMO_BUILD%"
+if exist "%PROJECT_DIR%" rmdir /S /Q "%PROJECT_DIR%"
 mkdir "%INSTALL_DIR%"
 mkdir "%BUILD_DIR%"
 mkdir "%DEMO_BUILD%"
+mkdir "%PROJECT_BIN%"
+mkdir "%PROJECT_LIB%"
 
-echo [4/7] Configuring HDF5 with VS2022 and ifx...
+echo [4/8] Configuring HDF5 with VS2022 and ifx...
 pushd "%BUILD_DIR%" >nul
 cmake "%SRC_DIR%" -G "Visual Studio 17 2022" -A x64 -T "fortran=ifx" ^
   -DCMAKE_INSTALL_PREFIX="%INSTALL_DIR%" ^
@@ -61,7 +67,7 @@ if errorlevel 1 (
   exit /b 1
 )
 
-echo [5/7] Building package and install targets...
+echo [5/8] Building package and install targets...
 cmake --build . --config Release --target package
 if errorlevel 1 (
   popd >nul
@@ -77,7 +83,7 @@ if errorlevel 1 (
 )
 popd >nul
 
-echo [6/7] Configuring and building Fortran smoke test...
+echo [6/8] Configuring and building Fortran smoke test...
 cmake -S "%DEMO_SRC%" -B "%DEMO_BUILD%" -G "Visual Studio 17 2022" -A x64 -T "fortran=ifx" ^
   -DCMAKE_PREFIX_PATH="%INSTALL_DIR%"
 if errorlevel 1 (
@@ -90,7 +96,7 @@ if errorlevel 1 (
   exit /b 1
 )
 
-echo [7/7] Running smoke test...
+echo [7/8] Running smoke test...
 set "PATH=%INSTALL_DIR%\bin;%PATH%"
 set "SMOKE_EXE=%DEMO_BUILD%\Release\hdf5_fortran_smoke.exe"
 if not exist "%SMOKE_EXE%" set "SMOKE_EXE=%DEMO_BUILD%\hdf5_fortran_smoke.exe"
@@ -107,8 +113,38 @@ if not "%SMOKE_RC%"=="0" (
   exit /b %SMOKE_RC%
 )
 
+echo [8/8] Creating deploy folder with exe and DLLs...
+copy /Y "%SMOKE_EXE%" "%PROJECT_BIN%\hdf5_fortran_smoke.exe" >nul
+if errorlevel 1 (
+  echo ERROR: failed to copy executable.
+  exit /b 1
+)
+
+if exist "%INSTALL_DIR%\bin\*.dll" copy /Y "%INSTALL_DIR%\bin\*.dll" "%PROJECT_LIB%\" >nul
+if exist "%INSTALL_DIR%\lib\*.dll" copy /Y "%INSTALL_DIR%\lib\*.dll" "%PROJECT_LIB%\" >nul
+
+for %%D in (libifcoremd.dll libifportmd.dll libmmd.dll svml_dispmd.dll libiomp5md.dll) do (
+  for /f "delims=" %%P in ('where %%D 2^>nul') do (
+    if not exist "%PROJECT_LIB%\%%~nxP" copy /Y "%%P" "%PROJECT_LIB%\" >nul
+  )
+)
+
+(
+  echo @echo off
+  echo setlocal EnableExtensions
+  echo set "ROOT=%%~dp0"
+  echo if "%%ROOT:~-1%%"=="\" set "ROOT=%%ROOT:~0,-1%%"
+  echo set "PATH=%%ROOT%%\lib;%%PATH%%"
+  echo "%%ROOT%%\bin\hdf5_fortran_smoke.exe"
+  echo set "RC=%%ERRORLEVEL%%"
+  echo endlocal ^& exit /b %%RC%%
+) > "%PROJECT_DIR%\run_demo.bat"
+
 echo.
 echo SUCCESS
 echo HDF5 install: %INSTALL_DIR%
 echo Demo output: %DEMO_BUILD%\fortran_demo.h5
+echo Deploy exe: %PROJECT_BIN%\hdf5_fortran_smoke.exe
+echo Deploy libs: %PROJECT_LIB%
+echo Launcher: %PROJECT_DIR%\run_demo.bat
 exit /b 0

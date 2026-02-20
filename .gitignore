@@ -4,6 +4,9 @@ build_x64_VS2022/
 build_demo_x64_VS2022/
 bin_x64_VS2022/
 install/
+project/bin/
+project/lib/
+project/*.h5
 
 # CMake-generated files (in case of in-source configure)
 CMakeCache.txt
