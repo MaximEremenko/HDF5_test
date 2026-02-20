@@ -46,7 +46,7 @@ git submodule update --init --recursive
 
 ## One-click run
 
-From `c:\Projects\HDF5_test`:
+From the repository root (for example, `c:\Projects\HDF5_test`):
 
 ```bat
 hdf5_fortran_vs_demo.bat
@@ -64,7 +64,7 @@ If successful, the demo creates:
 1. `build_demo_x64_VS2022\fortran_demo.h5`
 2. `project\bin\hdf5_fortran_smoke.exe` (Fortran app)
 3. `project\bin\*.dll` (runtime DLLs for direct launch)
-4. `project\lib\*.lib` (import/static libraries)
+4. `project\lib\*.lib` and `project\lib\*.a` (import/static libraries)
 
 Run deployed exe:
 
