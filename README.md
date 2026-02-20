@@ -46,7 +46,7 @@ git submodule update --init --recursive
 
 ## One-click run
 
-From the repository root (for example, `c:\Projects\HDF5_test`):
+From the repository root:
 
 ```bat
 hdf5_fortran_vs_demo.bat
