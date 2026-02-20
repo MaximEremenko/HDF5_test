@@ -48,7 +48,7 @@ hdf5_fortran_vs_demo.bat
 
 After a successful run:
 
-1. `build_demo_x64_VS2022\fortran_demo.h5`
+1. `build_demo_x64_VS2022\fortran_demo.h5` containing dataset `random_array_5` (5 random `double` values)
 2. `project\bin\hdf5_fortran_smoke.exe`
 3. `project\bin\*.dll` (runtime DLLs)
 4. `project\lib\*.lib` and `project\lib\*.a` (import/static libraries)
